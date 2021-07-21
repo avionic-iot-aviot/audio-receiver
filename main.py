@@ -39,16 +39,16 @@ while True:
     data, address = s.recvfrom(8192)
 
     packet = Packets.getPacketFromBytes(data)
-    print (packet.printLitePacket())
+    #print (packet.printLitePacket())
     print("--->", GetIp(config['GENERAL']['InterfaceRasp']))
 
     if (packet.Destination == GetIp(config['GENERAL']['InterfaceRasp'])):
         if(int(packet.Type) == 2):
             print("Data Received from: ", packet.Source)
             if count==100:
-                os.remove("./sample.txt")
+                os.remove("./{}.txt".format(packet.Source))
                 count=0
-            f = open("./sample.txt", "ab")
+            f = open("./{}.txt".format(packet.Source), "ab")
             f.write(packet.Payload)
             f.close()
             count+=1
