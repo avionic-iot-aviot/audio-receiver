@@ -45,7 +45,7 @@ while True:
     if (packet.Destination == GetIp(config['GENERAL']['InterfaceRasp'])):
         if(int(packet.Type) == 2):
             print("Data Received from: ", packet.Source)
-            if count==100:
+            if count==1024:
                 os.remove("./{}.txt".format(packet.Source))
                 count=0
             f = open("./{}.txt".format(packet.Source), "ab")
