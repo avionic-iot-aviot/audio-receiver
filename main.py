@@ -45,11 +45,13 @@ while True:
     if (packet.Destination == GetIp(config['GENERAL']['InterfaceRasp'])):
         if(int(packet.Type) == 2):
             print("Data Received from: ", packet.Source)
-            if count==1024:
-                os.remove("./{}.txt".format(packet.Source))
-                count=0
-            f = open("./{}.txt".format(packet.Source), "ab")
-            f.write(packet.Payload)
+            #if count==1024:
+            #    os.remove("./{}.txt".format(packet.Source))
+            #    count=0
+            elements = bytearray(packet.Payload)
+            del elements[::3] # every 3 chars it has the synch character to be deleted
+            f = open("./{}.bin".format(packet.Source), "ab")
+            f.write(elements)
             f.close()
             count+=1
             print("packet count: "+str(count))
