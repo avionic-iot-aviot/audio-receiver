@@ -50,7 +50,7 @@ while True:
             #    count=0
             elements = bytearray(packet.Payload)
             del elements[::3] # every 3 chars it has the synch character to be deleted
-            f = open("./{}.bin".format(packet.Source), "ab")
+            f = open("/dev/shm/{}.bin".format(packet.Source), "ab")
             f.write(elements)
             f.close()
             count+=1
