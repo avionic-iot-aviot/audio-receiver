@@ -36,15 +36,6 @@ NEUTRAL_BYTE_VALUE = b'/x31'
 
 #expected_bytes_to_write = samples_rate_per_seconds * writer_sleep_time * sample_size_in_bytes #bytes needed to be written when the writer thread awakes
 
-# MAIN
-
-queue19216833 = Queue()
-threadUDPReceiver = ThreadUDPReceiver("UDPReceiverThread", queue19216833)
-threadByteWriter = ThreadByteWriter("ByteWriterThread", queue19216833)
-
-threadUDPReceiver.start()
-threadByteWriter.start()
-
 class ThreadUDPReceiver(threading.Thread):
     def __init__(self, name, queue):
         threading.Thread.__init__(self)
@@ -143,3 +134,14 @@ class ThreadByteWriter(threading.Thread):
             else:
                 # We want to prevent overflowing for this variable, when the micr is off
                 self.times_queue_was_empty = 6
+
+
+
+# MAIN
+
+queue19216833 = Queue()
+threadUDPReceiver = ThreadUDPReceiver("UDPReceiverThread", queue19216833)
+threadByteWriter = ThreadByteWriter("ByteWriterThread", queue19216833)
+
+threadUDPReceiver.start()
+threadByteWriter.start()
