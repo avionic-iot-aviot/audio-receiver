@@ -49,9 +49,30 @@ while True:
             #    os.remove("./{}.txt".format(packet.Source))
             #    count=0
             elements = bytearray(packet.Payload)
-            del elements[::3] # every 3 chars it has the synch character to be deleted
+            #del elements[::3] # every 3 chars it has the synch character to be deleted
             f = open("/dev/shm/{}.bin".format(packet.Source), "ab")
-            f.write(elements)
+            #f.write(elements)
+
+            i = 0
+            last_sample = b'\x00\x00'
+            while i < len(elements) - 2:
+                if elements[i] == 48:
+                    #Next is a sample
+                    if elements[i+1] != 48 and elements[i+2] != 48:
+                        f.write(elements[i+1:i+3])
+                        last_sample = elements[i+1:i+3]
+                        i += 2
+                    #Next is not a sample
+                    else:
+                        #Resend the last sample and move on
+                        f.write(last_sample)
+                        if elements[i+1] == 48:
+                            i += 1
+                        else:
+                            i += 2
+                #If it is not a 48 move on
+                else:
+                    i += 1
             f.close()
             count+=1
             print("packet count: "+str(count))
