@@ -3,6 +3,7 @@ import os
 import datetime
 import time
 import subprocess
+import psutil
 
 
 parser = argparse.ArgumentParser(
@@ -121,6 +122,11 @@ while True:
             print("kill gstream")
             print("removing raw audio file")
             os.kill(gstreamer_pid, 9)
+            os.remove(audio_raw_file)
+            gstreamer_pid = None
+            
+        elif gstreamer_pid is not None and psutil.Process(gstreamer_pid).status() == psutil.STATUS_ZOMBIE:
+            print("gstreamer is a zombie process")
             os.remove(audio_raw_file)
             gstreamer_pid = None
 
