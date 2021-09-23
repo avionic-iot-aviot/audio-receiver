@@ -21,6 +21,8 @@ def GetIp(interface):
     
     return temp
 
+# VARIABLES
+
 sample_size_in_bytes = 2
 samples_rate_per_seconds = 6000 #Samples per seconds in bytes
 bytes_per_seconds = samples_rate_per_seconds * sample_size_in_bytes
@@ -34,7 +36,16 @@ NEUTRAL_BYTE_VALUE = b'/x31'
 
 #expected_bytes_to_write = samples_rate_per_seconds * writer_sleep_time * sample_size_in_bytes #bytes needed to be written when the writer thread awakes
 
-class ThreadReader(threading.Thread):
+# MAIN
+
+queue19216833 = Queue()
+threadUDPReceiver = ThreadUDPReceiver("UDPReceiverThread", queue19216833)
+threadByteWriter = ThreadByteWriter("ByteWriterThread", queue19216833)
+
+threadUDPReceiver.start()
+threadByteWriter.start()
+
+class ThreadUDPReceiver(threading.Thread):
     def __init__(self, name, queue):
         threading.Thread.__init__(self)
         self.name = name
