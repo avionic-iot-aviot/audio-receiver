@@ -62,6 +62,7 @@ class ThreadUDPReceiver(threading.Thread):
             if (packet.Destination == GetIp(config['GENERAL']['InterfaceRasp'])):
                 if(int(packet.Type) == 2):
                     elements = bytearray(packet.Payload)
+                    bytes_to_write = bytearray()
                     temp_bytes = bytearray()
                     bytes_effectively_written = 0
 
@@ -72,21 +73,32 @@ class ThreadUDPReceiver(threading.Thread):
                             temp_bytes.extend(elements[i:i+1])
                         elif element_as_int == 48:
                             if len(temp_bytes) == 2:
-                                self.queue.put(temp_bytes[0:2])
+                                #self.queue.put(temp_bytes[0:2])
+                                bytes_to_write.extend(temp_bytes[0:2])
                                 bytes_effectively_written += 2
-                            elif len(temp_bytes) == 1:
-                                self.queue.put(temp_bytes[0:1] * 2)
-                                #print("Missing one byte")
-                                bytes_effectively_written += 2
-                            elif len(temp_bytes) == 0 and i != 0:
-                                self.queue.put(NEUTRAL_BYTE_VALUE * 2)
-                                print("UDP-RECEIVERMissing both the bytes ", i)
-                                bytes_effectively_written += 2
+                            # elif len(temp_bytes) == 1:
+                            #     self.queue.put(temp_bytes[0:1] * 2)
+                            #     #print("Missing one byte")
+                            #     bytes_effectively_written += 2
+                            # elif len(temp_bytes) == 0 and i != 0:
+                            #     self.queue.put(NEUTRAL_BYTE_VALUE * 2)
+                            #     print("UDP-RECEIVER: Missing both the bytes ", i)
+                            #     bytes_effectively_written += 2
                             elif len(temp_bytes) > 2:
-                                print("UDP-RECEIVER I have more than 2 bytes")
+                                print("UDP-RECEIVER: I have more than 2 bytes")
                             temp_bytes = bytearray()
                         i += 1
-                    ##print("UDP-RECEIVER: Data Received from: ", packet.Source, ' Size: ', len(elements), ' Effect: ', bytes_effectively_written)
+                        
+                        
+                        
+                    if len(bytes_to_write) > 0:
+                        # We don't write if we are not receiving (or 5 times neutral writing have been executed)  
+                        #print("Byte-Writer: byte sent ", len(bytes_to_write))
+                        f = open("/dev/shm/{}.bin".format(packet.Source), "ab")
+                        f.write(bytes_to_write)
+                        f.close()
+                    
+                    print("UDP-RECEIVER: Data Received from: ", packet.Source, ' Size: ', len(elements), ' Effect: ', bytes_effectively_written)
                     
                     count+=1
                     ##print("UDP-RECEIVER: packet count "+str(count))
@@ -110,7 +122,7 @@ class ThreadByteWriter(threading.Thread):
                 # If the queue was not empty, it writes neutral bytes (for maximum 5 times)
                 if self.times_queue_was_empty < 5:
                     print("Byte-Writer: Queue is empty! I'm sending neutral bytes.")
-                    bytes.extend(NEUTRAL_BYTE_VALUE * emitted_bytes_per_loop)
+                    #bytes.extend(NEUTRAL_BYTE_VALUE * emitted_bytes_per_loop)
             
             # We have bytes in the queue
             elif not self.queue.empty():
@@ -129,7 +141,7 @@ class ThreadByteWriter(threading.Thread):
                 if bytes_i_have_extracted_from_queue < emitted_bytes_per_loop:
                     #print("Byte-Writer: I was not able to get all the bytes I needed. I got only: ", bytes_i_have_extracted_from_queue, " out of ", emitted_samples_per_loop)
                     diff = emitted_bytes_per_loop - bytes_i_have_extracted_from_queue
-                    bytes.extend(NEUTRAL_BYTE_VALUE * diff)            
+                    #bytes.extend(NEUTRAL_BYTE_VALUE * diff)            
             
             
             if len(bytes) > 0:
@@ -155,7 +167,7 @@ class ThreadByteWriter(threading.Thread):
 
 queue19216833 = Queue()
 threadUDPReceiver = ThreadUDPReceiver("UDPReceiverThread", queue19216833)
-threadByteWriter = ThreadByteWriter("ByteWriterThread", queue19216833)
+#threadByteWriter = ThreadByteWriter("ByteWriterThread", queue19216833)
 
 threadUDPReceiver.start()
-threadByteWriter.start()
+#threadByteWriter.start()
