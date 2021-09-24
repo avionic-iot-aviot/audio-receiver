@@ -3,6 +3,7 @@ from Packets import Packets
 from configparser import ConfigParser
 import ifaddr
 import socket
+import audioop
 
 
 config = ConfigParser()
@@ -26,6 +27,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # Bind the socket to the port
 server_address = (GetIp(config['GENERAL']['InterfaceRasp']), int(config['GENERAL']['PortRasp']))
 s.bind(server_address)
+volume_multiplier = 1
 
 while True:
     ##print("####### Node is listening #######")
@@ -46,9 +48,11 @@ while True:
             while i < len(elements):
                 if elements[i] != 48: # our separator is b'/x30' which is 48 in ASCII (literal '0')
                     temp_bytes.extend(elements[i:i+1])
+                    
                 elif elements[i] == 48:
                     if len(temp_bytes) == 2:
-                        bytes_to_write.extend(temp_bytes[0:2])
+                        bytes_amplified = audioop.mul(temp_bytes[0:2], 2, volume_multiplier)
+                        bytes_to_write.extend(bytes_amplified)
                         bytes_effectively_written += 2
                     temp_bytes = bytearray()
                 i += 1
