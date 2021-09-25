@@ -3,7 +3,6 @@ from Packets import Packets
 from configparser import ConfigParser
 import ifaddr
 import socket
-import audioop
 
 
 config = ConfigParser()
@@ -51,8 +50,10 @@ while True:
                     
                 elif elements[i] == 48:
                     if len(temp_bytes) == 2:
-                        bytes_amplified = audioop.mul(temp_bytes[0:2], 2, volume_multiplier)
-                        bytes_to_write.extend(bytes_amplified)
+                        integer = int.from_bytes(temp_bytes, "big", signed="True")
+                        integer *= 12
+                        new_bytes = integer.to_bytes(2, 'big', signed=True)
+                        bytes_to_write.extend(new_bytes)
                         bytes_effectively_written += 2
                     temp_bytes = bytearray()
                 i += 1
