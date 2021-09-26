@@ -111,7 +111,7 @@ while True:
             #proc = subprocess.Popen(["watch", "ls", audio_raw_file])
             #proc = subprocess.Popen(["sleep", "30"])
             proc = subprocess.Popen(
-                    [f"cat {audio_raw_file} | gst-launch-1.0 fdsrc fd=0 ! rawaudioparse use-sink-caps=false format=pcm pcm-format=s16be sample-rate=6000 num-channels=1 ! audioconvert  !  audioresample !  opusenc ! rtpopuspay ! udpsink host={janus_ip} port={janus_port}"],
+                    [f"gst-launch-1.0 filesrc location={audio_raw_file} ! rawaudioparse use-sink-caps=false format=pcm pcm-format=s16be sample-rate=6000 num-channels=1 ! audioconvert  !  audioresample !  opusenc ! rtpopuspay ! udpsink host={janus_ip} port={janus_port}"],
                 shell=True
             )
 
