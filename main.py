@@ -51,8 +51,15 @@ while True:
                 elif elements[i] == 48:
                     if len(temp_bytes) == 2:
                         integer = int.from_bytes(temp_bytes, "big", signed="True")
-                        integer *= 12
-                        new_bytes = integer.to_bytes(2, 'big', signed=True)
+                        integer *= volume_multiplier
+                        try:
+                            new_bytes = integer.to_bytes(2, 'big', signed=True)
+                        except:
+                            if integer > 0:
+                                integer = 30000
+                            else:
+                                integer = -30000
+                            new_bytes = integer.to_bytes(2, 'big', signed=True)
                         bytes_to_write.extend(new_bytes)
                         bytes_effectively_written += 2
                     temp_bytes = bytearray()
