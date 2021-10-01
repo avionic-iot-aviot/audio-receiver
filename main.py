@@ -26,12 +26,24 @@ s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # Bind the socket to the port
 server_address = (GetIp(config['GENERAL']['InterfaceRasp']), int(config['GENERAL']['PortRasp']))
 s.bind(server_address)
-volume_multiplier = 1
+volume_multiplier = 12
 
 while True:
     ##print("####### Node is listening #######")
     data, address = s.recvfrom(8192)
-
+    if len(data) < 5:
+        try:
+            new_volume_multiplier = int(data)
+            if 1 < new_volume_multiplier < 50:
+                volume_multiplier = new_volume_multiplier
+            elif new_volume_multiplier <= 1:
+                volume_multiplier = 1
+            else:
+                volume_multiplier = 50
+            print("New volume multiplier is: {}".format(volume_multiplier))
+        except:
+            print("Received a wrong value for volume_multiplier.")
+        continue
     packet = Packets.getPacketFromBytes(data)
 
     if (packet.Destination == GetIp(config['GENERAL']['InterfaceRasp'])):
